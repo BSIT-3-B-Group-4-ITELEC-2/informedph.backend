@@ -1,0 +1,6 @@
+@informedph.backend_HostAddress = http://localhost:5162
+
+GET {{informedph.backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
