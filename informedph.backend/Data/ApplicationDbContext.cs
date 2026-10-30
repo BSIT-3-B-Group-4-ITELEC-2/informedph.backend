@@ -24,5 +24,6 @@ namespace informedph.backend.Data
         }
 
         public DbSet<Test> Tests => Set<Test>();
+        public DbSet<Subscriber> Subscribers => Set<Subscriber>();
     }
 }
