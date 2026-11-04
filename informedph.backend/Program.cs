@@ -1,4 +1,4 @@
-
+using informedph.backend;
 using informedph.backend.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,37 +10,33 @@ namespace informedph.backend
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             var connectionString = builder.Configuration
                 .GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException(
-                    "Database connection string is missing."
-                );
+                ?? throw new InvalidOperationException("Database connection string is missing.");
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseMySQL(connectionString);
             });
 
+            // Add HttpClient Factory
+            builder.Services.AddHttpClient();
+
+            // Register NewsAggregator as Hosted Background Service
+            builder.Services.AddHostedService<NewsAggregator>();
 
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
