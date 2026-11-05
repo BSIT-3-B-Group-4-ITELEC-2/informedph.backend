@@ -1,0 +1,88 @@
+﻿@model informedph.backend.View_Models.NewsletterViewModel
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="
+    margin: 0;
+    padding: 0;
+    background-color: #F3F6FA;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #1D2939;
+    ">
+
+    <div style="max-width: 680px; margin: 0 auto; padding: 24px 12px;">
+        <div style="
+            background-color: #FFFFFF;
+            padding: 32px 28px;
+            border-radius: 12px 12px 0 0;
+            color: black;
+            ">
+            <h1>InformedPH</h1>
+            <h2>
+                @Model.NewsletterDate.ToString("MMMM dd, yyyy")
+            </h2>
+        </div>
+        <div style="background-color: white; padding: 28px;">
+
+            @foreach (var article in Model.Articles)
+            {
+                <div style="
+                    border: 1px solid #E4E7EC;
+                    border-radius: 10px;
+                    padding: 22px;
+                    margin-bottom: 24px;
+                    ">
+
+                    <h2 style="
+                        font-size: 20px;
+                        color: #102B46;
+                        ">
+                        @article.Title
+                    </h2>
+
+                    <p style="color: #667085; font-size: 12px;">
+                        @article.PublishedAt.ToString("MMMM dd, yyyy · hh:mm tt")
+                    </p>
+
+                    <h3>Summary</h3>
+
+                    <p style="line-height: 1.7;">
+                        @article.Summary
+                    </p>
+
+                    <h3>Why this matters</h3>
+
+                    <p style="line-height: 1.7;">
+                        @article.Explanation
+                    </p>
+
+                    <a href="@article.Url"
+                       style="color: #175CD3; text-decoration: none;">
+                        Read full article →
+                    </a>
+
+                </div>
+            }
+        </div>
+        <div style="
+            background-color: #F3F6FA;
+            padding: 24px;
+            text-align: center;
+            ">
+            <p style="font-size: 12px; color: #667085;">
+                You're receiving this newsletter because
+                you subscribed to InformedPH.
+            </p>
+
+            <p style="font-size: 12px; color: #98A2B3;">
+                © @Model.NewsletterDate.Year InformedPH
+            </p>
+        </div>
+    </div>
+</body>
+</html>
