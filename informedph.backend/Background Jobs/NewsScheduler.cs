@@ -91,11 +91,12 @@ namespace informedph.backend.Background_Jobs
                 philippineTime
             );
 
-            await ExecuteNewsletterDistributorAsync(
-                scope.ServiceProvider, 
-                context, 
-                cancellationToken
-            );
+            // Disabled Temporarily for frontend API integration
+            //await ExecuteNewsletterDistributorAsync(
+            //    scope.ServiceProvider, 
+            //    context, 
+            //    cancellationToken
+            //);
         }
 
         private async Task ExecuteNewsletterDistributorAsync(
