@@ -1,8 +1,4 @@
-<<<<<<< Updated upstream
-﻿using System.Xml;
-=======
-<<<<<<< HEAD:informedph.backend/NewsAggregator.cs
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,14 +7,12 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-=======
-﻿using System.Xml;
->>>>>>> aa2f361bb04a52efe9b363255c80bbf1ef04fb69:informedph.backend/Background Jobs/NewsAggregator.cs
->>>>>>> Stashed changes
 using informedph.backend.Data;
 using informedph.backend.Models;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace informedph.backend
 {
