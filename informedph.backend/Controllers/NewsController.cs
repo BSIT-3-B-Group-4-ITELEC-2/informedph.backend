@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using informedph.backend.Models;
+using informedph.backend.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace informedph.backend.Controllers
@@ -18,18 +19,31 @@ namespace informedph.backend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<NewsArticle>>> GetAll(int page = 1, int pageSize = 20)
+        public async Task<ActionResult<PagedResponse<NewsArticle>>> GetAll(int page = 1, int pageSize = 10)
         {
             page = Math.Max(page, 1);
             pageSize = Math.Clamp(pageSize, 1, 100);
 
+            var totalItems = await _context.NewsArticles.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
             var items = await _context.NewsArticles
                 .OrderByDescending(n => n.PublishedAt)
+                .ThenByDescending(n => n.Id)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
 
-            return Ok(items);
+            return Ok(new PagedResponse<NewsArticle>
+            {
+                Items = items,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages,
+                HasNextPage = page < totalPages,
+                HasPreviousPage = page > 1
+            });
         }
 
         [HttpGet("{id:int}")]
