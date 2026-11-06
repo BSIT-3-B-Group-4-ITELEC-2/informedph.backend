@@ -1,4 +1,20 @@
+<<<<<<< Updated upstream
 ﻿using System.Xml;
+=======
+<<<<<<< HEAD:informedph.backend/NewsAggregator.cs
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Xml;
+=======
+﻿using System.Xml;
+>>>>>>> aa2f361bb04a52efe9b363255c80bbf1ef04fb69:informedph.backend/Background Jobs/NewsAggregator.cs
+>>>>>>> Stashed changes
 using informedph.backend.Data;
 using informedph.backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -102,8 +118,11 @@ namespace informedph.backend
                         {
                             string title = node.SelectSingleNode("title")?.InnerText?.Trim() ?? "No Title";
                             string url = node.SelectSingleNode("link")?.InnerText?.Trim() ?? string.Empty;
-                            string description = node.SelectSingleNode("description")?.InnerText?.Trim() ?? string.Empty;
+                            string rawDescription = node.SelectSingleNode("description")?.InnerText?.Trim() ?? string.Empty;
                             string pubDateStr = node.SelectSingleNode("pubDate")?.InnerText?.Trim() ?? string.Empty;
+
+                            // Clean HTML tags and domains from the description summary
+                            string description = CleanHtmlSummary(rawDescription);
 
                             if (title.Length > 300) title = title[..300];
                             if (url.Length > 500) url = url[..500];
@@ -143,6 +162,27 @@ namespace informedph.backend
                 await dbContext.SaveChangesAsync(stoppingToken);
                 _logger.LogInformation("Successfully aggregated and saved {Count} new articles.", newArticles.Count);
             }
+        }
+
+        /// <summary>
+        /// Removes HTML tags (like <img>, <br/>) and leftover metadata domains (like images.gmanews.tv) from the text.
+        /// </summary>
+        private static string CleanHtmlSummary(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return string.Empty;
+
+            // 1. Remove all HTML tags (e.g. <img ... />, <br/>, etc.)
+            string noHtml = Regex.Replace(input, "<.*?>", string.Empty);
+
+            // 2. Remove trailing/isolated CDN image text fragments often found in GMA RSS feeds (e.g., "images.gmanews.tv")
+            noHtml = Regex.Replace(noHtml, @"images\.gmanews\.tv", string.Empty, RegexOptions.IgnoreCase);
+
+            // 3. Decode common HTML entities (like &amp;, &quot;, &#39;)
+            string decoded = System.Net.WebUtility.HtmlDecode(noHtml);
+
+            // 4. Trim extra whitespaces and newline breaks
+            return Regex.Replace(decoded, @"\s+", " ").Trim();
         }
     }
 }
