@@ -20,6 +20,17 @@ namespace informedph.backend
                 .GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("Database connection string is missing.");
 
+            // 1. Add CORS Policy (Allows your HTML frontend to talk to this backend)
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowFrontend", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             // Services
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -61,6 +72,10 @@ namespace informedph.backend
             }
 
             app.UseHttpsRedirection();
+
+            // 2. Enable CORS middleware (Must be before UseAuthorization and MapControllers)
+            app.UseCors("AllowFrontend");
+
             app.UseAuthorization();
             app.MapControllers();
 
