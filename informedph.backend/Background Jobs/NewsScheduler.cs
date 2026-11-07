@@ -128,11 +128,20 @@ namespace informedph.backend.Background_Jobs
                 return;
             }
 
-            var response = await client.GetFromJsonAsync<NewsApiResponse>
-            (
-                "news/",
-                cancellationToken
-            );
+            var response = new NewsApiResponse();
+
+            try
+            {
+               response = await client.GetFromJsonAsync<NewsApiResponse>
+               (
+                   "news/",
+                   cancellationToken
+               );
+            }
+            catch (Exception )
+            {
+                _logger.LogError("Error has occured while getting the articles in news API");
+            }
 
             if (response == null || response.Results.Count == 0)
             {
