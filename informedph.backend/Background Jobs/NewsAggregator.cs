@@ -115,12 +115,13 @@ namespace informedph.backend
                             string rawDescription = node.SelectSingleNode("description")?.InnerText?.Trim() ?? string.Empty;
                             string pubDateStr = node.SelectSingleNode("pubDate")?.InnerText?.Trim() ?? string.Empty;
 
-                            // Clean HTML tags and domains from the description summary
+                            string? imageUrl = ExtractImageUrl(rawDescription, node);
                             string description = CleanHtmlSummary(rawDescription);
 
                             if (title.Length > 300) title = title[..300];
                             if (url.Length > 500) url = url[..500];
                             if (description.Length > 1000) description = description[..1000];
+                            if (imageUrl != null && imageUrl.Length > 500) imageUrl = imageUrl[..500];
 
                             DateTime publishedAt = DateTime.TryParse(pubDateStr, out var parsedDate)
                                 ? parsedDate
@@ -139,6 +140,7 @@ namespace informedph.backend
                                 Title = title,
                                 Url = url,
                                 Summary = description,
+                                ImageUrl = imageUrl,
                                 PublishedAt = publishedAt
                             });
                         }
@@ -154,28 +156,43 @@ namespace informedph.backend
             {
                 await dbContext.NewsArticles.AddRangeAsync(newArticles, stoppingToken);
                 await dbContext.SaveChangesAsync(stoppingToken);
-                _logger.LogInformation("Successfully aggregated and saved {Count} new articles.", newArticles.Count);
+                _logger.LogInformation("Successfully aggregated and saved {Count} new articles with images.", newArticles.Count);
             }
         }
 
-        /// <summary>
-        /// Removes HTML tags (like <img>, <br/>) and leftover metadata domains (like images.gmanews.tv) from the text.
-        /// </summary>
+        private static string? ExtractImageUrl(string rawDescription, XmlNode itemNode)
+        {
+            if (!string.IsNullOrEmpty(rawDescription))
+            {
+                var match = Regex.Match(rawDescription, @"<img\s+[^>]*src=[""']([^""']+)[""']", RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    return match.Groups[1].Value;
+                }
+            }
+
+            XmlNode? enclosureNode = itemNode.SelectSingleNode("enclosure");
+            if (enclosureNode?.Attributes?["url"] != null)
+            {
+                return enclosureNode.Attributes["url"]?.Value;
+            }
+
+            XmlNode? mediaNode = itemNode.SelectSingleNode("*[local-name()='content' or local-name()='thumbnail']");
+            if (mediaNode?.Attributes?["url"] != null)
+            {
+                return mediaNode.Attributes["url"]?.Value;
+            }
+
+            return null;
+        }
+
         private static string CleanHtmlSummary(string input)
         {
             if (string.IsNullOrEmpty(input))
                 return string.Empty;
 
-            // 1. Remove all HTML tags (e.g. <img ... />, <br/>, etc.)
             string noHtml = Regex.Replace(input, "<.*?>", string.Empty);
-
-            // 2. Remove trailing/isolated CDN image text fragments often found in GMA RSS feeds (e.g., "images.gmanews.tv")
-            noHtml = Regex.Replace(noHtml, @"images\.gmanews\.tv", string.Empty, RegexOptions.IgnoreCase);
-
-            // 3. Decode common HTML entities (like &amp;, &quot;, &#39;)
             string decoded = System.Net.WebUtility.HtmlDecode(noHtml);
-
-            // 4. Trim extra whitespaces and newline breaks
             return Regex.Replace(decoded, @"\s+", " ").Trim();
         }
     }

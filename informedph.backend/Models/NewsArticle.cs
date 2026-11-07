@@ -16,6 +16,9 @@ namespace informedph.backend.Models
         [MaxLength(1000)]
         public string? Summary { get; set; }
 
+        [MaxLength(500)]
+        public string? ImageUrl { get; set; }
+
         public DateTime PublishedAt { get; set; }
     }
 }
