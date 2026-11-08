@@ -122,6 +122,7 @@ namespace informedph.backend
                             if (url.Length > 500) url = url[..500];
                             if (description.Length > 1000) description = description[..1000];
                             if (imageUrl != null && imageUrl.Length > 500) imageUrl = imageUrl[..500];
+                            if (categoryName.Length > 100) categoryName = categoryName[..100];
 
                             DateTime publishedAt = DateTime.TryParse(pubDateStr, out var parsedDate)
                                 ? parsedDate
@@ -141,6 +142,7 @@ namespace informedph.backend
                                 Url = url,
                                 Summary = description,
                                 ImageUrl = imageUrl,
+                                Category = categoryName, // Added category mapping here
                                 PublishedAt = publishedAt
                             });
                         }
@@ -156,7 +158,7 @@ namespace informedph.backend
             {
                 await dbContext.NewsArticles.AddRangeAsync(newArticles, stoppingToken);
                 await dbContext.SaveChangesAsync(stoppingToken);
-                _logger.LogInformation("Successfully aggregated and saved {Count} new articles with images.", newArticles.Count);
+                _logger.LogInformation("Successfully aggregated and saved {Count} new articles with categories.", newArticles.Count);
             }
         }
 
